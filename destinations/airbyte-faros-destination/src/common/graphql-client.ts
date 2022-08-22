@@ -46,8 +46,7 @@ export class GraphQLClient {
   ) {
     this.schemaLoader = schemaLoader;
     this.backend = backend;
-    this.batchSize = 44;
-    // this.batchSize = batchSize;
+    this.batchSize = batchSize;
   }
 
   getBatchSize(): number {
