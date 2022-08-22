@@ -36,8 +36,10 @@ export interface PagerdutyConfig {
 }
 
 interface PagerdutyResponse<Type> {
+  url: string;
   status: number;
   statusText: string;
+  data: any;
   resource: Type[];
   next?: () => Promise<PagerdutyResponse<Type>>;
 }
@@ -114,8 +116,11 @@ export class Pagerduty {
     try {
       res = await func();
     } catch (err: any) {
+      const url = err.url ?? 'Unknown url';
       if (err.error_code || err.error_info) {
-        throw new VError(`${err.error_code}: ${err.error_info}`);
+        throw new VError(
+          `Received status code ${err.error_code}: ${err.error_info} from ${url}`
+        );
       }
       let errorMessage;
       try {
@@ -123,7 +128,7 @@ export class Pagerduty {
       } catch (wrapError: any) {
         errorMessage = wrapError.message;
       }
-      throw new VError(errorMessage);
+      throw new VError(`Error from ${url}. Message: ${errorMessage}`);
     }
     return res;
   }
@@ -137,7 +142,11 @@ export class Pagerduty {
 
     do {
       if (response?.status >= 300) {
-        throw new VError(`${response?.status}: ${response?.statusText}`);
+        throw new VError(
+          `Error from ${response?.url}. Status code: ${response?.status}: ${
+            response?.statusText
+          }. Data: ${JSON.stringify(response?.data)}`
+        );
       }
       if (response?.next) fetchNextFunc = response?.next;
 
