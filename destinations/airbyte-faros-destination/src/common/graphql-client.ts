@@ -46,7 +46,8 @@ export class GraphQLClient {
   ) {
     this.schemaLoader = schemaLoader;
     this.backend = backend;
-    this.batchSize = batchSize;
+    this.batchSize = 44;
+    // this.batchSize = batchSize;
   }
 
   getBatchSize(): number {
@@ -196,21 +197,19 @@ export class GraphQLClient {
     const gql = GraphQLClient.batchMutation(queries);
     if (gql) {
       const res = await this.backend.postQuery(gql);
-      if (res.errors) {
+      const errors = res.errors || res.data.errors;
+      if (errors) {
         this.logger.warn(
-          `Error while saving batch: ${JSON.stringify(
-            res.errors
-          )}. Query: ${gql}`
+          `Error while saving batch: ${JSON.stringify(errors)}. Query: ${gql}`
         );
         // now try mutations individually and fail on the first bad one
         for (const op of this.writeBuffer) {
           const opGql = jsonToGraphQLQuery(op.query);
           const opRes = await this.backend.postQuery(opGql);
-          if (opRes.errors) {
+          const errors = opRes.errors || opRes.data.errors;
+          if (errors) {
             throw new VError(
-              `${op.errorMsg} with query '${opGql}': ${JSON.stringify(
-                opRes.errors
-              )}`
+              `${op.errorMsg} with query '${opGql}': ${JSON.stringify(errors)}`
             );
           } else {
             this.writeBuffer.shift();
