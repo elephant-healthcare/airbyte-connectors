@@ -1,0 +1,32 @@
+{
+  "documentationUrl": "https://docs.faros.ai",
+  "connectionSpecification": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Grafana Incident source connector",
+    "type": "object",
+    "required": [
+      "server_url",
+      "token"
+    ],
+    "additionalProperties": true,
+    "properties": {
+      "server_url": {
+        "type": "string",
+        "title": "Grafana Incident server URL",
+        "examples": [
+          "https://my-company.grafana.net"
+        ]
+      },
+      "token": {
+        "type": "string",
+        "title": "Grafana Incident Token",
+        "airbyte_secret": true
+      },
+      "team_label_regex": {
+        "type": "string",
+        "title": "Used to extract team names from labels. Default ^team:(\\w+)$",
+        "default": "^team:(\\w+)$"
+      }
+    }
+  }
+}
