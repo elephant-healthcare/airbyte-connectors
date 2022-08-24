@@ -3,6 +3,7 @@
   "type": "object",
   "required": [
     "incidentID",
+    "labels",
     "isDrill",
     "createdTime",
     "modifiedTime",
@@ -91,8 +92,48 @@
     "overviewURL": {
       "type": "string"
     },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "user"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "required": [
+              "userID",
+              "name",
+              "email"
+            ],
+            "properties": {
+              "userID": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "version": {
       "type": "number"
+    },
+    "summary": {
+      "type": "string"
     },
     "incidentStart": {
       "type": "string"
