@@ -20,6 +20,10 @@ function categoryAndDetail<T extends string>(
   return {category: name, detail: name};
 }
 
+// TO TEST:
+// look at GH test - does it assert calls to mock API?
+// ensure append works
+
 // KNOWN LIMITATIONS:
 // - Does not ingest tasks - these must be linked to tms_Task
 //
@@ -43,8 +47,10 @@ export class Incidents extends Converter {
 
   async convert(
     record: AirbyteRecord,
-    _ctx: StreamContext
+    ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
+    const config = ctx.config.source_specific_configs?.grafana_incident;
+
     const source = this.streamName.source;
     const incident = record.record.data as Incident | undefined;
     const res: DestinationRecord[] = [];
@@ -74,9 +80,11 @@ export class Incidents extends Converter {
       },
     });
 
-    // Users with "commander" or "investigator" roles will be assigned to the incident
+    // Users with these roles will be assigned to the incident
+    // TODO: test
+    const assigneeRoles = config.assignee_roles.split(' ');
     const assignee = incident.roles?.find(({role}) =>
-      ['commander', 'investigator'].includes(role)
+      assigneeRoles.includes(role)
     )?.user;
     if (assignee) {
       const {userID, email, name} = assignee;
@@ -117,9 +125,8 @@ export class Incidents extends Converter {
         },
       });
 
-      // TODO: configuration option for this
       // Labels starting with team: should be used to assign the incident to a team
-      const teamRe = /^team:(\w+)$/;
+      const teamRe = new RegExp(config.team_label_regex);
       const teamMatches = teamRe.exec(label);
       if (teamMatches) {
         const [, team] = teamMatches;
@@ -146,8 +153,6 @@ export class Incidents extends Converter {
         });
       }
     });
-
-    // (POST MVP ISSUE) ims_User will have email only, but tms_User does not have emailAddress - why?
 
     return res;
   }
