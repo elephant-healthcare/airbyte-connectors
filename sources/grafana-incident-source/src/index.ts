@@ -37,7 +37,6 @@ class GrafanaIncidentSource extends AirbyteSourceBase {
     }
   }
   streams(config: AirbyteConfig): AirbyteStreamBase[] {
-    const client = new GrafanaIncidentClient(config);
-    return [new Incidents(this.logger, client)];
+    return [new Incidents(this.logger, config)];
   }
 }

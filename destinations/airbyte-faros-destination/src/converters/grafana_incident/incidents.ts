@@ -66,11 +66,7 @@ export class Incidents extends Converter {
         source,
         title: incident.title,
         description: incident.description,
-        // TODO: Use config for URL - maybe put in the source instead and just map the url
-        url:
-          incident.overviewURL &&
-          `https://elephanthealthcare.grafana.net${incident.overviewURL}`,
-
+        url: incident.overviewURL,
         createdAt: Utils.toDate(incident.incidentStart),
         updatedAt: Utils.toDate(incident.modifiedTime),
         acknowledgedAt: Utils.toDate(incident.createdTime),

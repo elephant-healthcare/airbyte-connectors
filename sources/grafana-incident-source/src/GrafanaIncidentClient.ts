@@ -1,9 +1,10 @@
 import axios, {Axios} from 'axios';
 import {AirbyteConfig} from 'faros-airbyte-cdk/lib';
 
-// TODO
+// TODO reuse type in destination
 export type Incident = {
   modifiedTime: string;
+  overviewURL: string;
 };
 
 export default class GrafanaIncidentClient {
@@ -11,7 +12,7 @@ export default class GrafanaIncidentClient {
 
   constructor(config: AirbyteConfig) {
     this.client = axios.create({
-      baseURL: `${config.server_url}/api/plugins/grafana-incident-app/resources/api/`,
+      baseURL: `${config.server_url}/api`,
       headers: {
         Authorization: `Bearer ${config.token}`,
       },
@@ -26,25 +27,28 @@ export default class GrafanaIncidentClient {
   // - incremental vs full refresh
   // - fromDate being provided properly
   // - cursor automatically fetching next
-  async *getIncidents(fromDate?: number): AsyncGenerator<Incident[]> {
+  async *getIncidents(fromDate?: number): AsyncGenerator<Incident> {
     let hasMore = false;
     let nextValue = '';
 
     do {
-      const res = await this.client.post('IncidentsService.QueryIncidents', {
-        query: {
-          limit: 100,
-          includeStatuses: [],
-          onlyDrills: false,
-          dateFrom: fromDate ? `${fromDate}` : '',
-          dateTo: '',
-          excludeStatuses: [],
-          incidentLabels: [],
-          orderDirection: 'DESC',
-          severity: '',
-        },
-        cursor: {hasMore, nextValue},
-      });
+      const res = await this.client.post(
+        '/plugins/grafana-incident-app/resources/api/IncidentsService.QueryIncidents',
+        {
+          query: {
+            limit: 100,
+            includeStatuses: [],
+            onlyDrills: false,
+            dateFrom: fromDate ? `${fromDate}` : '',
+            dateTo: '',
+            excludeStatuses: [],
+            incidentLabels: [],
+            orderDirection: 'DESC',
+            severity: '',
+          },
+          cursor: {hasMore, nextValue},
+        }
+      );
 
       const {cursor, incidents} = res.data;
 

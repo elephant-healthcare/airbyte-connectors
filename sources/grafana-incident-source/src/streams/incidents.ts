@@ -1,4 +1,5 @@
 import {
+  AirbyteConfig,
   AirbyteLogger,
   AirbyteStreamBase,
   StreamKey,
@@ -9,8 +10,11 @@ import {Dictionary} from 'ts-essentials';
 import GrafanaIncidentClient, {Incident} from '../GrafanaIncidentClient';
 
 export class Incidents extends AirbyteStreamBase {
-  constructor(logger: AirbyteLogger, private client: GrafanaIncidentClient) {
+  private client: GrafanaIncidentClient;
+
+  constructor(logger: AirbyteLogger, private config: AirbyteConfig) {
     super(logger);
+    this.client = new GrafanaIncidentClient(config);
   }
 
   getJsonSchema(): Dictionary<any, string> {
@@ -28,7 +32,7 @@ export class Incidents extends AirbyteStreamBase {
     _cursorField?: string[],
     _streamSlice?: Dictionary<any, string>,
     streamState?: Dictionary<any, string>
-  ): AsyncGenerator<Dictionary<any, string>, any, unknown> {
+  ): AsyncGenerator<Incident> {
     const lastCutoff: number = streamState?.cutoff ?? 0;
     if (lastCutoff > Date.now()) {
       this.logger.info(
@@ -40,7 +44,13 @@ export class Incidents extends AirbyteStreamBase {
     const fromDate = syncMode === SyncMode.FULL_REFRESH ? 0 : lastCutoff;
 
     for await (const incident of this.client.getIncidents(fromDate)) {
-      yield incident;
+      // Override the overviewURL to prepend the Grafana instance URL to the path
+      yield {
+        ...incident,
+        overviewURL:
+          incident.overviewURL &&
+          `${this.config.server_url}${incident.overviewURL}`,
+      };
     }
   }
 
@@ -48,15 +58,10 @@ export class Incidents extends AirbyteStreamBase {
     currentStreamState: Dictionary<any>,
     latestRecord: Incident
   ): Dictionary<any> {
-    this.logger.info(`Current cutoff: ${currentStreamState.cutOff}`);
     const nextCutoff = Math.max(
       currentStreamState.cutoff ?? 0,
       new Date(latestRecord.modifiedTime).getTime() ?? 0
     );
-    this.logger.info(`Current cutoff: ${currentStreamState.cutOff}`);
-    this.logger.info(`Next cutoff: ${nextCutoff}`);
-    return {
-      cutoff: nextCutoff,
-    };
+    return {cutoff: nextCutoff};
   }
 }
