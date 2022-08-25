@@ -17,6 +17,12 @@ function getApplicationPlatform(repo: string): string | undefined {
   return undefined;
 }
 
+type TeamRepository = {
+  name: string;
+  team_slug: string;
+  organization: string;
+};
+
 /**
  * Custom Elephant converter
  * Consumes from custom team_repositories stream from the Elephant forked GitHub source
@@ -33,7 +39,7 @@ export class TeamRepositories extends GitHubConverter {
     record: AirbyteRecord
   ): Promise<ReadonlyArray<DestinationRecord>> {
     const source = this.streamName.source;
-    const repo = record.record.data;
+    const repo = record.record.data as TeamRepository;
     if (repo.organization !== 'elephant-healthcare') {
       return [];
     }
