@@ -24,7 +24,7 @@ function categoryAndDetail<T extends string>(
 // - Does not ingest tasks - these must be linked to tms_Task
 //
 export class Incidents extends Converter {
-  source = 'GrafanaIncident';
+  source = 'Grafana_Incident';
 
   readonly destinationModels: ReadonlyArray<DestinationModel> = [
     'ims_Incident',
