@@ -44,3 +44,8 @@ export type IssueLabel = {
   updatedAt: string | null;
   archivedAt: string | null;
 };
+
+export type Team = {
+  id: string;
+  name: string;
+};

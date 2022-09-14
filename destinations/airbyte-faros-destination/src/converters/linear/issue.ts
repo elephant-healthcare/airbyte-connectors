@@ -24,9 +24,10 @@ class IssueConverter extends Converter {
   ];
 
   private readonly issueLabelStream = new StreamName('linear', 'issue_label');
+  private readonly teamStream = new StreamName('linear', 'team');
 
   override get dependencies(): ReadonlyArray<StreamName> {
-    return [this.issueLabelStream];
+    return [this.issueLabelStream, this.teamStream];
   }
 
   id(record: AirbyteRecord): any {
@@ -72,7 +73,7 @@ class IssueConverter extends Converter {
         // status: stateId && {source, uid: stateId}, // TODO: actually, FK to workflow state, expects status, may need to alter schema?
         points: estimate,
         priority: `${priority}`,
-        // team: // TODO: see above
+        team: teamId && {source, uid: teamId},
         parent: parentId && {source, uid: parentId},
       },
     });
