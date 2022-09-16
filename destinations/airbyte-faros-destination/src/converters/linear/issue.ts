@@ -10,11 +10,6 @@ import {
 import {Issue} from './types';
 
 // MVP - ingest issues with labels so we can count bugs
-// Also need to ingest teams in Linear, map to GH, and issue-team mapping
-//
-// TEAMS:
-// - create new tms_Team table
-// - one-to-one relationship to ims_Team on name (???)
 class IssueConverter extends Converter {
   source = 'Linear';
 
@@ -39,8 +34,6 @@ class IssueConverter extends Converter {
     record: AirbyteRecord,
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
-    // const config = ctx.config.source_specific_configs?.grafana_incident;
-
     const source = this.streamName.source;
     const issue = record.record.data as Issue | undefined;
     const res: DestinationRecord[] = [];

@@ -4,7 +4,7 @@ import {DestinationModel, DestinationRecord} from '../converter';
 import {GitHubConverter} from './common';
 
 export class Teams extends GitHubConverter {
-  readonly destinationModels: ReadonlyArray<DestinationModel> = ['ims_Team'];
+  readonly destinationModels: ReadonlyArray<DestinationModel> = ['vcs_Team'];
 
   async convert(
     record: AirbyteRecord
@@ -13,7 +13,7 @@ export class Teams extends GitHubConverter {
     const team = record.record.data;
 
     const out = {
-      model: 'ims_Team',
+      model: 'vcs_Team',
       record: {
         uid: team.slug,
         name: team.name,
